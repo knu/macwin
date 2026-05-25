@@ -1,11 +1,15 @@
 APP_BUNDLE ?= .build/MacWin.app
 CONFIGURATION ?= release
 PRODUCT := .build/$(CONFIGURATION)/macwin
+SWIFT_BUILD_FLAGS := -c $(CONFIGURATION)
+ifeq ($(DISABLE_SANDBOX),1)
+SWIFT_BUILD_FLAGS += --disable-sandbox
+endif
 
 .PHONY: app build clean-app install-app
 
 build:
-	swift build -c $(CONFIGURATION)
+	swift build $(SWIFT_BUILD_FLAGS)
 
 app: build
 	rm -rf $(APP_BUNDLE)
