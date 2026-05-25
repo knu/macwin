@@ -1,0 +1,78 @@
+#!/bin/sh
+
+set -eu
+
+default_app_path() {
+    CDPATH=
+    script_dir=$(cd -- "$(dirname -- "$0")" && pwd)
+    app_path=$(cd -- "$script_dir/../.." && pwd)
+    if [ -f "$app_path/Contents/Info.plist" ]; then
+        printf '%s\n' "$app_path"
+    else
+        printf '%s\n' "$HOME/Applications/MacWin.app"
+    fi
+}
+
+APP_PATH=${MACWIN_APP_PATH:-$(default_app_path)}
+
+usage() {
+    cat <<'EOF'
+Usage:
+  macwin-cli <subcommand> [options]
+
+Environment:
+  MACWIN_APP_PATH  Path to MacWin.app
+EOF
+}
+
+# shellcheck disable=SC2329
+cleanup() {
+    if [ "${stdout_pid:-}" ]; then
+        kill "$stdout_pid" 2>/dev/null || true
+    fi
+    if [ "${stderr_pid:-}" ]; then
+        kill "$stderr_pid" 2>/dev/null || true
+    fi
+    if [ "${tmpdir:-}" ]; then
+        rm -rf "$tmpdir"
+    fi
+}
+
+main() {
+    if [ "$#" -eq 0 ]; then
+        usage
+        exit 2
+    fi
+
+    if [ ! -d "$APP_PATH" ]; then
+        printf 'macwin: app bundle not found: %s\n' "$APP_PATH" >&2
+        exit 1
+    fi
+
+    tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/macwin.XXXXXX")
+    stdout_pipe=$tmpdir/stdout
+    stderr_pipe=$tmpdir/stderr
+    status_file=$tmpdir/status
+    mkfifo "$stdout_pipe" "$stderr_pipe"
+    trap cleanup EXIT HUP INT TERM
+
+    cat "$stdout_pipe" &
+    stdout_pid=$!
+    cat "$stderr_pipe" >&2 &
+    stderr_pid=$!
+
+    if ! open -n "$APP_PATH" --args --stdout="$stdout_pipe" --stderr="$stderr_pipe" --status="$status_file" --cwd="$PWD" "$@"; then
+        exit 1
+    fi
+
+    while [ ! -f "$status_file" ]; do
+        sleep 0.01
+    done
+    IFS= read -r status <"$status_file"
+
+    wait "$stdout_pid" 2>/dev/null || true
+    wait "$stderr_pid" 2>/dev/null || true
+    exit "$status"
+}
+
+main "$@"
