@@ -6,13 +6,28 @@ A macOS command line tool for finding, OCRing, and raising windows.
 
 ## Installation
 
-Build and install the app bundle:
+Install from my Homebrew tap:
+
+```console
+% brew install knu/knu/macwin
+```
+
+Or tap it first:
+
+```console
+% brew tap knu/knu
+% brew install macwin
+```
+
+The Homebrew formula builds `MacWin.app` from source and installs the `macwin-cli` wrapper.
+
+To build from a checkout instead:
 
 ```console
 % make install-app
 ```
 
-This installs `MacWin.app` to `~/Applications`.  Use the wrapper script to launch the app-backed CLI:
+This installs `MacWin.app` to `~/Applications`.  Use the local wrapper script to launch the app-backed CLI:
 
 ```console
 % bin/macwin-cli --help
