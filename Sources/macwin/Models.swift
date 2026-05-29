@@ -119,7 +119,12 @@ struct FindConfig {
     var raise = false
     var ocr = false
     var includeAXTitle = false
+    var wait: Double?
     var workingDirectory = FileManager.default.currentDirectoryPath
+
+    var hasWaitableCondition: Bool {
+        titleRegex != nil || !predicates.isEmpty || limit != nil
+    }
 }
 
 extension Optional where Wrapped == String {

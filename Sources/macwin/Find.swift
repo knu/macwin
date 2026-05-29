@@ -25,6 +25,36 @@ struct CandidateWindow {
     let scWindow: SCWindow?
 }
 
+func runFindWithWait(_ config: FindConfig) async throws -> FindResponse {
+    guard let timeout = config.wait, config.hasWaitableCondition, timeout > 0 else {
+        return try await runFind(config)
+    }
+    let interval: Double = config.ocr ? 1.0 : 0.5
+    let deadline = ContinuousClock.now.advanced(by: .seconds(timeout))
+    while true {
+        let response = try await runFind(config)
+        if waitConditionSatisfied(response: response, config: config) {
+            return response
+        }
+        let remaining = ContinuousClock.now.duration(to: deadline)
+        if remaining <= .zero {
+            return response
+        }
+        let sleepFor = min(.seconds(interval), remaining)
+        try await Task.sleep(for: sleepFor)
+    }
+}
+
+func waitConditionSatisfied(response: FindResponse, config: FindConfig) -> Bool {
+    guard !response.windows.isEmpty else {
+        return false
+    }
+    if let limit = config.limit {
+        return response.windows.count >= limit
+    }
+    return true
+}
+
 func runFind(_ config: FindConfig) async throws -> FindResponse {
     let candidates = try await candidateWindows(config)
     var results: [WindowResult] = []

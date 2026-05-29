@@ -101,6 +101,7 @@ OCR rectangles use logical coordinates with the origin at the window's top-left 
 - `--lang ja,en` — OCR recognition languages.
 - `--min-confidence VALUE` — Discard OCR tokens below the confidence value.
 - `--limit COUNT` — Stop after finding this many windows.
+- `--wait SEC` — Retry up to `SEC` seconds until the filter conditions match.  Requires at least one of `--title-regex`, `--where`, or `--limit`.  Polls every 0.5s (1.0s when `--ocr` is used).
 - `--exit-status` — Exit with status 1 if no windows matched.
 - `--raise` — Raise matched windows.
 - `--include-offscreen` — Include offscreen windows.

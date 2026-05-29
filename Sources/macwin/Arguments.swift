@@ -30,6 +30,8 @@ func parseFind(_ arguments: [String]) throws -> FindConfig {
             config.minConfidence = value
         case "--limit":
             config.limit = try parseLimit(parser.value(for: argument))
+        case "--wait":
+            config.wait = try parseWait(parser.value(for: argument))
         case "--exit-status":
             config.exitStatus = true
         case "--raise":
@@ -112,6 +114,13 @@ func parseLimit(_ value: String) throws -> Int {
         throw MacWinError(description: "invalid value for --limit")
     }
     return limit
+}
+
+func parseWait(_ value: String) throws -> Double {
+    guard let seconds = Double(value), seconds >= 0, seconds.isFinite else {
+        throw MacWinError(description: "invalid value for --wait")
+    }
+    return seconds
 }
 
 func parseOCRRegion(_ value: String, name: String) throws -> OCRRegion {

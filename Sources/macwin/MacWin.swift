@@ -28,7 +28,7 @@ enum MacWin {
                 initializeWindowServerConnection()
                 var config = try parseFind(arguments)
                 config.workingDirectory = streams.cwdPath ?? FileManager.default.currentDirectoryPath
-                let response = try await runFind(config)
+                let response = try await runFindWithWait(config)
                 try writeJSON(response, pretty: config.pretty)
                 if config.raise {
                     try raiseWindows(response.windows)
@@ -77,6 +77,7 @@ enum MacWin {
               --lang ja,en
               --min-confidence VALUE
               --limit COUNT
+              --wait SEC
               --exit-status
               --raise
               --include-offscreen
