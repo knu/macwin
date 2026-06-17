@@ -393,7 +393,6 @@ func save(image: CGImage, to path: String, workingDirectory: String) throws {
         throw MacWinError(description: "failed to save image: \(url.path)")
     }
 }
-
 func fileURL(path: String, workingDirectory: String) -> URL {
     path.hasPrefix("/")
         ? URL(fileURLWithPath: path)

@@ -167,6 +167,18 @@ func raiseWindow(windowID: CGWindowID) throws {
         throw MacWinError(description: "failed to raise window \(windowID): \(raiseError.rawValue)")
     }
 
+    try setAXAttribute(
+        element: target.appElement,
+        attribute: kAXFrontmostAttribute,
+        value: kCFBooleanTrue,
+        errorMessage: "failed to make app frontmost for window \(windowID)"
+    )
+    try setAXAttribute(
+        element: target.appElement,
+        attribute: kAXFocusedWindowAttribute,
+        value: target.element,
+        errorMessage: "failed to focus window \(windowID)"
+    )
     AXUIElementSetAttributeValue(target.element, kAXMainAttribute as CFString, kCFBooleanTrue)
     AXUIElementSetAttributeValue(target.element, kAXFocusedAttribute as CFString, kCFBooleanTrue)
 }
@@ -186,7 +198,11 @@ func closeWindow(windowID: CGWindowID) throws {
     }
 }
 
-typealias AXWindowTarget = (pid: pid_t, element: AXUIElement)
+struct AXWindowTarget {
+    let pid: pid_t
+    let appElement: AXUIElement
+    let element: AXUIElement
+}
 
 func axWindow(windowID: CGWindowID) throws -> AXWindowTarget {
     let options: CGWindowListOption = [.optionAll, .excludeDesktopElements]
@@ -213,7 +229,14 @@ func axWindow(windowID: CGWindowID) throws -> AXWindowTarget {
         throw MacWinError(description: "AX window not found: \(windowID)")
     }
 
-    return (pid, target)
+    return AXWindowTarget(pid: pid, appElement: appElement, element: target)
+}
+
+func setAXAttribute(element: AXUIElement, attribute: String, value: CFTypeRef, errorMessage: String) throws {
+    let error = AXUIElementSetAttributeValue(element, attribute as CFString, value)
+    guard error == .success else {
+        throw MacWinError(description: "\(errorMessage): \(error.rawValue)")
+    }
 }
 
 func writeJSON<T: Encodable>(_ value: T, pretty: Bool) throws {
