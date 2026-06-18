@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>MacWin</string>
 	<key>CFBundleIdentifier</key>
-	<string>net.knu.macwin</string>
+	<string>org.idaemons.macwin</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
