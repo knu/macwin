@@ -19,3 +19,5 @@ This repository builds `macwin`, a macOS command line tool for finding, OCRing, 
 
 - Avoid testing through `MacWin.app` launch or the `macwin-cli` wrapper unless that exact packaging path is under test.  Those paths rely on macOS Privacy & Security permissions for the app bundle.  If the permissions are missing, macOS may fail, prompt interactively, or change focus at the wrong time, making the test unreliable.
 - For wrapper-specific tests, make sure the relevant Screen Recording and Accessibility permissions have already been granted before starting verification.
+- GUI integration tests are opt-in.  Run them with `MACWIN_RUN_GUI_TESTS=1`; they should skip on GitHub Actions because hosted runners do not provide a reliable logged-in GUI session with TCC permissions.
+- Test cleanup must not rely on AppleScript or other Apple Events that can hang on permission prompts.  Prefer `macwin`'s own window lookup and close paths, and put timeouts around any external helper process used by tests.
