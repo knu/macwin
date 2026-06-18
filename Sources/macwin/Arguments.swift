@@ -36,6 +36,8 @@ func parseFind(_ arguments: [String]) throws -> FindConfig {
             config.exitStatus = true
         case "--raise":
             config.raise = true
+        case "--close":
+            config.close = true
         case "--include-offscreen":
             config.includeOffscreen = true
         case "--ax":
@@ -49,6 +51,9 @@ func parseFind(_ arguments: [String]) throws -> FindConfig {
 
     if !config.ocr, config.predicates.contains(where: predicateReferencesOCR) {
         throw MacWinError(description: "--ocr X,Y,W,H[;name=NAME] is required when --where references ocr")
+    }
+    if config.raise, config.close {
+        throw MacWinError(description: "--raise and --close are mutually exclusive")
     }
     if config.appName == nil, config.bundleID == nil, config.windowID == nil {
         throw MacWinError(description: "one of --app, --bundle-id, or --window-id is required")

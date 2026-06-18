@@ -71,6 +71,12 @@ Find and raise matching windows:
 % bin/macwin-cli find --bundle-id com.microsoft.Edge --title-regex Dashboard --raise --exit-status
 ```
 
+Find and close matching windows:
+
+```console
+% bin/macwin-cli find --bundle-id com.microsoft.Edge --title-regex Dashboard --close --exit-status
+```
+
 ## OCR
 
 Use `--ocr` to recognize text from one or more window-local rectangles:
@@ -104,6 +110,7 @@ OCR rectangles use logical coordinates with the origin at the window's top-left 
 - `--wait SEC` — Retry up to `SEC` seconds until the filter conditions match.  Requires at least one of `--title-regex`, `--where`, or `--limit`.  Polls every 0.5s (1.0s when `--ocr` is used).
 - `--exit-status` — Exit with status 1 if no windows matched.
 - `--raise` — Raise matched windows.
+- `--close` — Close matched windows.  Cannot be used with `--raise`.
 - `--include-offscreen` — Include offscreen windows.
 - `--ax` — Include `ax_title` in JSON output.  This can be much slower because it queries Accessibility for each candidate window; use it only when necessary.
 - `--pretty` — Pretty-print JSON.

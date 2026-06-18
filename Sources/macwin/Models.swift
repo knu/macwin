@@ -117,6 +117,7 @@ struct FindConfig {
     var limit: Int?
     var exitStatus = false
     var raise = false
+    var close = false
     var ocr = false
     var includeAXTitle = false
     var wait: Double?

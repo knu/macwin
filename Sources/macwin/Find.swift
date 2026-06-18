@@ -246,6 +246,12 @@ func raiseWindows(_ windows: [WindowResult]) throws {
     }
 }
 
+func closeWindows(_ windows: [WindowResult]) throws {
+    for window in windows {
+        try closeWindow(windowID: window.windowID)
+    }
+}
+
 func matches(window: CandidateWindow, config: FindConfig) -> Bool {
     guard preliminaryMatches(window: window, config: config) else {
         return false

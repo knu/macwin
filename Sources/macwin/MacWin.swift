@@ -34,6 +34,9 @@ enum MacWin {
                 if config.raise {
                     try raiseWindows(response.windows)
                 }
+                if config.close {
+                    try closeWindows(response.windows)
+                }
                 if config.exitStatus, response.windows.isEmpty {
                     exitCode = 1
                 }
@@ -81,6 +84,7 @@ enum MacWin {
               --wait SEC
               --exit-status
               --raise
+              --close
               --include-offscreen
               --ax               include ax_title; much slower, use only when necessary
               --pretty
