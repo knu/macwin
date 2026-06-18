@@ -151,6 +151,7 @@ func candidateWindows(_ config: FindConfig) async throws -> [CandidateWindow] {
             }
             let cgTitle = cgTitles[window.windowID].nonEmpty
             let scTitle = window.title.nonEmpty
+            let axTitle = config.includeAXTitle ? axTitle(pid: app.processID, windowID: window.windowID) : nil
             return CandidateWindow(
                 windowID: window.windowID,
                 pid: app.processID,
@@ -159,7 +160,7 @@ func candidateWindows(_ config: FindConfig) async throws -> [CandidateWindow] {
                 title: cgTitle ?? scTitle,
                 cgTitle: cgTitle,
                 scTitle: scTitle,
-                axTitle: config.includeAXTitle ? axTitle(pid: app.processID, windowID: window.windowID) : nil,
+                axTitle: axTitle,
                 includeAXTitle: config.includeAXTitle,
                 bounds: window.frame,
                 isOnScreen: window.isOnScreen,
@@ -170,7 +171,7 @@ func candidateWindows(_ config: FindConfig) async throws -> [CandidateWindow] {
 
     let windows = try cgWindowInfo()
     let candidates = windows.compactMap { candidateWindow($0, scTitles: [:], includeAXTitle: config.includeAXTitle) }
-    let needsSCTitles = candidates.contains { candidate in
+    let needsSCTitles = !config.includeAXTitle && candidates.contains { candidate in
         candidate.title == nil && preliminaryMatches(window: candidate, config: config)
     }
     guard needsSCTitles else {
@@ -192,6 +193,7 @@ func candidateWindow(_ info: [String: Any], scTitles: [CGWindowID: String], incl
     let app = NSRunningApplication(processIdentifier: pid)
     let cgTitle = (info[kCGWindowName as String] as? String).nonEmpty
     let scTitle = scTitles[windowID].nonEmpty
+    let axTitle = includeAXTitle ? axTitle(pid: pid, windowID: windowID) : nil
     return CandidateWindow(
         windowID: windowID,
         pid: pid,
@@ -200,7 +202,7 @@ func candidateWindow(_ info: [String: Any], scTitles: [CGWindowID: String], incl
         title: cgTitle ?? scTitle,
         cgTitle: cgTitle,
         scTitle: scTitle,
-        axTitle: includeAXTitle ? axTitle(pid: pid, windowID: windowID) : nil,
+        axTitle: axTitle,
         includeAXTitle: includeAXTitle,
         bounds: bounds,
         isOnScreen: boolValue(info[kCGWindowIsOnscreen as String]),

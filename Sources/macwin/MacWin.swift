@@ -1,3 +1,4 @@
+import AppKit
 import ApplicationServices
 import CoreGraphics
 import Darwin
@@ -162,17 +163,30 @@ func redirect(path: String, to target: Int32) throws {
 
 func raiseWindow(windowID: CGWindowID) throws {
     let target = try axWindow(windowID: windowID)
+    guard NSRunningApplication(processIdentifier: target.pid)?.activate(options: []) == true else {
+        throw MacWinError(description: "failed to activate app for window \(windowID)")
+    }
+    usleep(50_000)
+
     let raiseError = AXUIElementPerformAction(target.element, kAXRaiseAction as CFString)
     guard raiseError == .success else {
         throw MacWinError(description: "failed to raise window \(windowID): \(raiseError.rawValue)")
     }
 
-    try setAXAttribute(
-        element: target.appElement,
-        attribute: kAXFrontmostAttribute,
-        value: kCFBooleanTrue,
-        errorMessage: "failed to make app frontmost for window \(windowID)"
-    )
+    try focusWindow(target, windowID: windowID)
+    if focusedWindowID(appElement: target.appElement) != windowID {
+        try focusWindow(target, windowID: windowID)
+        let retryError = AXUIElementPerformAction(target.element, kAXRaiseAction as CFString)
+        guard retryError == .success else {
+            throw MacWinError(description: "failed to raise window \(windowID): \(retryError.rawValue)")
+        }
+    }
+    guard focusedWindowID(appElement: target.appElement) == windowID else {
+        throw MacWinError(description: "failed to focus window \(windowID)")
+    }
+}
+
+func focusWindow(_ target: AXWindowTarget, windowID: CGWindowID) throws {
     try setAXAttribute(
         element: target.appElement,
         attribute: kAXFocusedWindowAttribute,
@@ -181,6 +195,21 @@ func raiseWindow(windowID: CGWindowID) throws {
     )
     AXUIElementSetAttributeValue(target.element, kAXMainAttribute as CFString, kCFBooleanTrue)
     AXUIElementSetAttributeValue(target.element, kAXFocusedAttribute as CFString, kCFBooleanTrue)
+}
+
+func focusedWindowID(appElement: AXUIElement) -> CGWindowID? {
+    var value: CFTypeRef?
+    guard AXUIElementCopyAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, &value) == .success,
+          let window = value
+    else {
+        return nil
+    }
+
+    var windowID = CGWindowID(0)
+    guard _AXUIElementGetWindow(unsafeDowncast(window, to: AXUIElement.self), &windowID) == .success else {
+        return nil
+    }
+    return windowID
 }
 
 func closeWindow(windowID: CGWindowID) throws {
