@@ -105,7 +105,7 @@ OCR rectangles use logical coordinates with the origin at the window's top-left 
 - `--exit-status` — Exit with status 1 if no windows matched.
 - `--raise` — Raise matched windows.
 - `--include-offscreen` — Include offscreen windows.
-- `--ax` — Include `ax_title` in JSON output.
+- `--ax` — Include `ax_title` in JSON output.  This can be much slower because it queries Accessibility for each candidate window; use it only when necessary.
 - `--pretty` — Pretty-print JSON.
 
 The `title` field prefers `CGWindowName` and falls back to `SCWindow.title` when needed.

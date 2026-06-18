@@ -82,7 +82,7 @@ enum MacWin {
               --exit-status
               --raise
               --include-offscreen
-              --ax
+              --ax               include ax_title; much slower, use only when necessary
               --pretty
             """
         )
