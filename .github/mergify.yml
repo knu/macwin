@@ -1,0 +1,27 @@
+queue_rules:
+  - name: dependency-updates
+    batch_size: 1
+    checks_timeout: auto
+    merge_method: merge-batch
+    queue_conditions:
+      - base = main
+      - author ~= ^(dependabot|renovate|lockfile-maintenance)\[bot\]$
+      - -draft
+      - -conflict
+      - "#approved-reviews-by >= 1"
+      - "#changes-requested-reviews-by = 0"
+      - check-success = Check
+    merge_conditions:
+      - "#approved-reviews-by >= 1"
+      - "#changes-requested-reviews-by = 0"
+      - check-success = Check
+
+merge_protections_settings:
+  auto_merge_conditions:
+    - base = main
+    - author ~= ^(dependabot|renovate|lockfile-maintenance)\[bot\]$
+    - -draft
+    - -conflict
+    - "#approved-reviews-by >= 1"
+    - "#changes-requested-reviews-by = 0"
+  reporting_method: check-runs
